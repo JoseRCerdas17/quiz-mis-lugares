@@ -1,50 +1,134 @@
-# Welcome to your Expo app 👋
+# 📍 MisLugares — App React Native con Expo
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App móvil para guardar lugares favoritos en un mapa, con persistencia SQLite.
 
-## Get started
+---
 
-1. Install dependencies
+## Integrantes y responsabilidades
 
-   ```bash
-   npm install
-   ```
+| # | Archivo(s) | Rol |
+|---|-----------|-----|
+| 1 | `components/MapaLugares.tsx` | Mapa base, manejo de `onLongPress` |
+| 2 | `database/database.ts` | SQLite: tipos, `insertarLugar`, `obtenerLugares` |
+| 3 | `components/MarcadoresLugares.tsx`, `components/ModalNuevoLugar.tsx` | Marcadores con Callout, Modal de formulario |
+| **4** | **`app/(tabs)/index.tsx`** | **Integración, estado global, persistencia con `useFocusEffect`** |
 
-2. Start the app
+### Dependencias entre integrantes
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+Integrante 1 ──► Integrante 4 (MapaLugares)
+Integrante 2 ──► Integrante 3 (tipos Lugar)
+             ──► Integrante 4 (insertarLugar, obtenerLugares)
+Integrante 3 ──► Integrante 4 (MarcadoresLugares, ModalNuevoLugar)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Instalación
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+git clone <url-del-repo>
+cd places-native-app
+npm install
+npx expo start
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Escanear el QR con **Expo Go** (iOS/Android) o correr en emulador.
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## Cómo funciona la integración (Integrante 4)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Persistencia con `useFocusEffect`
+
+```ts
+useFocusEffect(
+  useCallback(() => {
+    setLugares(obtenerLugares()); // lee SQLite cada vez que la pantalla recibe foco
+  }, [])
+);
+```
+
+Esto garantiza que aunque el usuario navegue a otras pantallas y vuelva, los datos siempre están actualizados desde SQLite.
+
+### Flujo completo de datos
+
+```
+Long press en mapa
+    → handleLongPress(lat, lng)
+    → setCoordSeleccionada({ lat, lng })
+    → aparece <ModalNuevoLugar>
+
+Usuario escribe y guarda
+    → handleGuardar(nombre, descripcion)
+    → insertarLugar(...) [escribe en SQLite]
+    → setLugares(obtenerLugares()) [re-lee SQLite]
+    → setCoordSeleccionada(null) [cierra modal]
+    → React re-renderiza <MarcadoresLugares lugares={lugares}>
+    → nuevo marcador aparece en el mapa
+```
+
+### Por qué los marcadores se actualizan solos
+
+`MarcadoresLugares` recibe `lugares` como prop. Cuando `setLugares(...)` actualiza el estado en `index.tsx`, React re-renderiza el componente automáticamente — no se necesita ningún efecto adicional.
+
+---
+
+## Trabajar sin los otros integrantes
+
+Si los otros integrantes aún no terminaron, usar los placeholders en `_placeholders/placeholders.tsx`. Exportan las mismas interfaces y nombres que los componentes reales, por lo que `index.tsx` funciona sin cambios.
+
+Para activarlos temporalmente, cambiar los imports en `index.tsx`:
+
+```ts
+// Temporales (placeholders)
+import { MapaLugares, MarcadoresLugares, ModalNuevoLugar } from '@/_placeholders/placeholders';
+import { insertarLugar, obtenerLugares, Lugar } from '@/_placeholders/placeholders';
+
+// Reales (cuando estén listos)
+import MapaLugares from '@/components/MapaLugares';
+import MarcadoresLugares from '@/components/MarcadoresLugares';
+import ModalNuevoLugar from '@/components/ModalNuevoLugar';
+import { insertarLugar, obtenerLugares, Lugar } from '@/database/database';
+```
+
+---
+
+## Demo (2-3 minutos)
+
+### 1. Apertura y persistencia (30 seg)
+- Abrir la app → el mapa se centra en la ubicación actual
+- Si ya hay lugares guardados, los marcadores aparecen de inmediato (SQLite cargado en `useFocusEffect`)
+
+### 2. Agregar un lugar (45 seg)
+- Hacer **long press** en cualquier punto del mapa
+- Aparece el modal con las coordenadas pre-llenadas
+- Escribir nombre: `"Café Central"` y descripción: `"El mejor café del barrio"`
+- Tocar **Guardar** → el marcador aparece en el mapa instantáneamente
+
+### 3. Persistencia real (30 seg)
+- Cerrar la app completamente
+- Volver a abrirla → los marcadores siguen en el mapa
+- Explicar: los datos están en SQLite, no en memoria
+
+### 4. Callout (20 seg)
+- Tocar un marcador existente
+- Aparece el Callout con nombre y descripción
+- Demostrar con dos marcadores diferentes
+
+### 5. Re-renderizado reactivo (15 seg)
+- Agregar un segundo lugar sin recargar
+- Señalar que el marcador aparece inmediatamente gracias a la reactividad de React
+
+---
+
+## Stack técnico
+
+| Tecnología | Uso |
+|-----------|-----|
+| React Native | UI móvil |
+| Expo / expo-router | Navegación y build |
+| react-native-maps | Mapa y marcadores |
+| expo-sqlite | Persistencia local |
+| TypeScript | Tipado estático |
+| `useFocusEffect` | Recarga al enfocar pantalla |
