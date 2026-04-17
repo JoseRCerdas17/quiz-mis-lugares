@@ -42,39 +42,61 @@ export default function ModalNuevoLugar({ visible, latitud, longitud, onGuardar,
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.card}>
-          <Text style={styles.titulo}>Nuevo lugar favorito</Text>
-          <Text style={styles.coords}>
-            {latitud.toFixed(5)}, {longitud.toFixed(5)}
-          </Text>
+          {/* Handle de arrastre */}
+          <View style={styles.handle} />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre del lugar"
-            value={nombre}
-            onChangeText={setNombre}
-            autoFocus
-            returnKeyType="next"
-          />
+          {/* Encabezado */}
+          <View style={styles.encabezado}>
+            <View style={styles.iconoContenedor}>
+              <Text style={styles.icono}>★</Text>
+            </View>
+            <View>
+              <Text style={styles.titulo}>Nuevo lugar favorito</Text>
+              <Text style={styles.coords}>
+                {latitud.toFixed(5)},  {longitud.toFixed(5)}
+              </Text>
+            </View>
+          </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Descripción (opcional)"
-            value={descripcion}
-            onChangeText={setDescripcion}
-            multiline
-            returnKeyType="done"
-          />
+          {/* Campos */}
+          <View style={styles.campo}>
+            <Text style={styles.label}>Nombre</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: Cafetería favorita"
+              placeholderTextColor="#bbb"
+              value={nombre}
+              onChangeText={setNombre}
+              autoFocus
+              returnKeyType="next"
+            />
+          </View>
 
+          <View style={styles.campo}>
+            <Text style={styles.label}>Descripción <Text style={styles.opcional}>(opcional)</Text></Text>
+            <TextInput
+              style={[styles.input, styles.inputMultilinea]}
+              placeholder="¿Qué tiene de especial este lugar?"
+              placeholderTextColor="#bbb"
+              value={descripcion}
+              onChangeText={setDescripcion}
+              multiline
+              numberOfLines={3}
+              returnKeyType="done"
+            />
+          </View>
+
+          {/* Botones */}
           <View style={styles.botones}>
-            <TouchableOpacity style={[styles.boton, styles.botonCancelar]} onPress={handleCancelar}>
+            <TouchableOpacity style={styles.botonCancelar} onPress={handleCancelar}>
               <Text style={styles.textoBotonCancelar}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.boton, styles.botonGuardar, !nombre.trim() && styles.botonDesactivado]}
+              style={[styles.botonGuardar, !nombre.trim() && styles.botonDesactivado]}
               onPress={handleGuardar}
               disabled={!nombre.trim()}
             >
-              <Text style={styles.textoBotonGuardar}>Guardar</Text>
+              <Text style={styles.textoBotonGuardar}>Guardar lugar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -83,39 +105,82 @@ export default function ModalNuevoLugar({ visible, latitud, longitud, onGuardar,
   );
 }
 
+const TINT = '#e84393';
+
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: '#00000066',
+    backgroundColor: '#00000070',
     justifyContent: 'flex-end',
   },
   card: {
     backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     padding: 24,
-    gap: 16,
+    paddingBottom: 36,
+    gap: 20,
   },
-  titulo: { fontSize: 18, fontWeight: 'bold', color: '#1a1a1a' },
-  coords: { fontSize: 12, color: '#888' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#ddd',
+    alignSelf: 'center',
+    marginBottom: 4,
   },
-  botones: { flexDirection: 'row', gap: 12 },
-  boton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 10,
+  encabezado: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  iconoContenedor: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: TINT,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  botonCancelar: { backgroundColor: '#f0f0f0' },
-  botonGuardar: { backgroundColor: '#2e86de' },
-  botonDesactivado: { backgroundColor: '#a0c4f0' },
-  textoBotonCancelar: { color: '#555', fontWeight: '600' },
-  textoBotonGuardar: { color: 'white', fontWeight: '600' },
+  icono: { fontSize: 22, color: 'white' },
+  titulo: { fontSize: 18, fontWeight: '700', color: '#1a1a1a' },
+  coords: { fontSize: 12, color: '#aaa', marginTop: 2 },
+  campo: { gap: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: '#444' },
+  opcional: { fontWeight: '400', color: '#aaa' },
+  input: {
+    borderWidth: 1.5,
+    borderColor: '#eee',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 15,
+    color: '#1a1a1a',
+    backgroundColor: '#fafafa',
+  },
+  inputMultilinea: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  botones: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+  },
+  botonCancelar: {
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: 14,
+    alignItems: 'center',
+    backgroundColor: '#f2f2f2',
+  },
+  botonGuardar: {
+    flex: 2,
+    paddingVertical: 15,
+    borderRadius: 14,
+    alignItems: 'center',
+    backgroundColor: TINT,
+  },
+  botonDesactivado: { backgroundColor: '#f0b8d8' },
+  textoBotonCancelar: { color: '#666', fontWeight: '600', fontSize: 15 },
+  textoBotonGuardar: { color: 'white', fontWeight: '700', fontSize: 15 },
 });
