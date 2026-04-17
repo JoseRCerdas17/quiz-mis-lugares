@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import MapaLugares from '@/components/MapaLugares';
 import ModalNuevoLugar from '@/components/ModalNuevoLugar';
@@ -13,6 +13,13 @@ export default function PantallaInicio() {
     lat: number;
     lng: number;
   } | null>(null);
+
+  // Recibe coordenadas desde la pantalla de lista
+  const params = useLocalSearchParams<{ lat?: string; lng?: string }>();
+  const focusCoords =
+    params.lat && params.lng
+      ? { lat: parseFloat(params.lat), lng: parseFloat(params.lng) }
+      : null;
 
   useFocusEffect(
     useCallback(() => {
@@ -37,7 +44,7 @@ export default function PantallaInicio() {
 
   return (
     <View style={styles.contenedor}>
-      <MapaLugares onLongPress={handleLongPress}>
+      <MapaLugares onLongPress={handleLongPress} focusCoords={focusCoords}>
         <MarcadoresLugares lugares={lugares} />
       </MapaLugares>
 
@@ -51,7 +58,7 @@ export default function PantallaInicio() {
         </View>
       </View>
 
-      {/* Hint en la parte inferior */}
+      {/* Hint inferior */}
       {!coordSeleccionada && (
         <View style={styles.hintContenedor}>
           <Text style={styles.hintTexto}>Mantén presionado el mapa para agregar un lugar</Text>
@@ -93,22 +100,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  headerTitulo: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1a1a1a',
-  },
+  headerTitulo: { fontSize: 16, fontWeight: '700', color: '#1a1a1a' },
   badge: {
     backgroundColor: TINT,
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  badgeTexto: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-  },
+  badgeTexto: { color: 'white', fontSize: 12, fontWeight: '600' },
   hintContenedor: {
     position: 'absolute',
     bottom: 32,
@@ -120,8 +119,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
   },
-  hintTexto: {
-    color: 'white',
-    fontSize: 13,
-  },
+  hintTexto: { color: 'white', fontSize: 13 },
 });

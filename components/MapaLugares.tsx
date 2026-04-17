@@ -1,21 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
 import MapView, { LongPressEvent, MapType } from 'react-native-maps';
 import * as Location from 'expo-location';
 
 type Props = {
   onLongPress: (latitud: number, longitud: number) => void;
+  focusCoords?: { lat: number; lng: number } | null;
   children?: React.ReactNode;
 };
 
-export default function MapaLugares({ onLongPress, children }: Props) {
+export default function MapaLugares({ onLongPress, focusCoords, children }: Props) {
+  const mapRef = useRef<MapView>(null);
   const [ubicacion, setUbicacion] = useState<Location.LocationObject | null>(null);
   const [permisoDenegado, setPermisoDenegado] = useState(false);
   const [tipoMapa, setTipoMapa] = useState<MapType>('standard');
-
-  const toggleTipoMapa = () => {
-    setTipoMapa((prev) => (prev === 'standard' ? 'satellite' : 'standard'));
-  };
 
   useEffect(() => {
     (async () => {
@@ -29,9 +27,27 @@ export default function MapaLugares({ onLongPress, children }: Props) {
     })();
   }, []);
 
+  // Cuando llegan coordenadas desde la lista, anima el mapa hacia ese punto
+  useEffect(() => {
+    if (!focusCoords) return;
+    mapRef.current?.animateToRegion(
+      {
+        latitude: focusCoords.lat,
+        longitude: focusCoords.lng,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      },
+      800
+    );
+  }, [focusCoords]);
+
   const handleLongPress = (e: LongPressEvent) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
     onLongPress(latitude, longitude);
+  };
+
+  const toggleTipoMapa = () => {
+    setTipoMapa((prev) => (prev === 'standard' ? 'satellite' : 'standard'));
   };
 
   if (permisoDenegado) {
@@ -56,6 +72,7 @@ export default function MapaLugares({ onLongPress, children }: Props) {
   return (
     <View style={styles.mapa}>
       <MapView
+        ref={mapRef}
         style={styles.mapa}
         mapType={tipoMapa}
         initialRegion={{
