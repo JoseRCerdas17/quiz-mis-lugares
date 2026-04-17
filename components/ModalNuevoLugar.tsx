@@ -18,13 +18,19 @@ type Props = {
   onCancelar: () => void;
 };
 
-export default function ModalNuevoLugar({ visible, latitud, longitud, onGuardar, onCancelar }: Props) {
+export default function ModalNuevoLugar({
+  visible,
+  latitud,
+  longitud,
+  onGuardar,
+  onCancelar
+}: Props) {
   const [nombre, setNombre] = useState('');
 
   const handleGuardar = () => {
     if (!nombre.trim()) return;
     onGuardar(nombre.trim());
-    setNombre('');
+    setNombre(''); // Limpiar para próxima vez
   };
 
   const handleCancelar = () => {
@@ -39,14 +45,16 @@ export default function ModalNuevoLugar({ visible, latitud, longitud, onGuardar,
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.card}>
-          <Text style={styles.titulo}>Nuevo lugar favorito</Text>
+          <Text style={styles.titulo}>📍 Nuevo lugar favorito</Text>
+
           <Text style={styles.coords}>
-            {latitud.toFixed(5)}, {longitud.toFixed(5)}
+            {latitud.toFixed(6)}°, {longitud.toFixed(6)}°
           </Text>
 
           <TextInput
             style={styles.input}
             placeholder="Nombre del lugar"
+            placeholderTextColor="#999"
             value={nombre}
             onChangeText={setNombre}
             autoFocus
@@ -55,11 +63,19 @@ export default function ModalNuevoLugar({ visible, latitud, longitud, onGuardar,
           />
 
           <View style={styles.botones}>
-            <TouchableOpacity style={[styles.boton, styles.botonCancelar]} onPress={handleCancelar}>
+            <TouchableOpacity
+              style={[styles.boton, styles.botonCancelar]}
+              onPress={handleCancelar}
+            >
               <Text style={styles.textoBotonCancelar}>Cancelar</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
-              style={[styles.boton, styles.botonGuardar, !nombre.trim() && styles.botonDesactivado]}
+              style={[
+                styles.boton,
+                styles.botonGuardar,
+                !nombre.trim() && styles.botonDesactivado
+              ]}
               onPress={handleGuardar}
               disabled={!nombre.trim()}
             >
@@ -85,8 +101,20 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 16,
   },
-  titulo: { fontSize: 18, fontWeight: 'bold', color: '#1a1a1a' },
-  coords: { fontSize: 12, color: '#888' },
+  titulo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    textAlign: 'center',
+  },
+  coords: {
+    fontSize: 12,
+    color: '#888',
+    textAlign: 'center',
+    backgroundColor: '#f5f5f5',
+    padding: 8,
+    borderRadius: 8,
+  },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
@@ -95,16 +123,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#f9f9f9',
   },
-  botones: { flexDirection: 'row', gap: 12 },
+  botones: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
   boton: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
   },
-  botonCancelar: { backgroundColor: '#f0f0f0' },
-  botonGuardar: { backgroundColor: '#2e86de' },
-  botonDesactivado: { backgroundColor: '#a0c4f0' },
-  textoBotonCancelar: { color: '#555', fontWeight: '600' },
-  textoBotonGuardar: { color: 'white', fontWeight: '600' },
+  botonCancelar: {
+    backgroundColor: '#f0f0f0'
+  },
+  botonGuardar: {
+    backgroundColor: '#2e86de'
+  },
+  botonDesactivado: {
+    backgroundColor: '#a0c4f0'
+  },
+  textoBotonCancelar: {
+    color: '#555',
+    fontWeight: '600'
+  },
+  textoBotonGuardar: {
+    color: 'white',
+    fontWeight: '600'
+  },
 });

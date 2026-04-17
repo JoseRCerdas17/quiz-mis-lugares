@@ -14,19 +14,22 @@ export default function MapaLugares({ onLongPress, children }: Props) {
 
   useEffect(() => {
     (async () => {
+      // Solicitar permiso de ubicación
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         setPermisoDenegado(true);
         return;
       }
+      // Obtener ubicación actual
       const loc = await Location.getCurrentPositionAsync({});
       setUbicacion(loc);
     })();
   }, []);
 
+  // Manejar el evento de long press en el mapa
   const handleLongPress = (e: LongPressEvent) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
-    onLongPress(latitude, longitude);
+    onLongPress(latitude, longitude); // Enviar coordenadas al padre
   };
 
   if (permisoDenegado) {
@@ -57,10 +60,10 @@ export default function MapaLugares({ onLongPress, children }: Props) {
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       }}
-      onLongPress={handleLongPress}
+      onLongPress={handleLongPress}  // 👈 Captura long press
       showsUserLocation
     >
-      {children}
+      {children}  {/* Aquí se renderizan los MarcadoresLugares */}
     </MapView>
   );
 }

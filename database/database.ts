@@ -42,7 +42,7 @@ export function insertarLugar(
   const database = getDB();
   const result = database.runSync(
     `INSERT INTO lugares (nombre, descripcion, latitud, longitud, imagen_uri)
-     VALUES (?, ?, ?, ?, ?);`,
+      VALUES (?, ?, ?, ?, ?);`,
     nombre,
     descripcion,
     latitud,
@@ -56,7 +56,7 @@ export function obtenerLugares(): Lugar[] {
   const database = getDB();
   return database.getAllSync<Lugar>(
     `SELECT id, nombre, descripcion, latitud, longitud, imagen_uri
-     FROM lugares
-     ORDER BY id DESC;`
+      FROM lugares
+      ORDER BY id DESC;`
   );
 }

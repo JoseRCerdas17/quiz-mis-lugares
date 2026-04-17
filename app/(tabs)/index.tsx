@@ -8,7 +8,10 @@ import MarcadoresLugares from '@/components/MarcadoresLugares';
 import { insertarLugar, obtenerLugares, Lugar } from '@/database/database';
 
 export default function PantallaInicio() {
+  // Estado para los lugares guardados en SQLite
   const [lugares, setLugares] = useState<Lugar[]>([]);
+
+  // Estado para la coordenada seleccionada con long press
   const [coordSeleccionada, setCoordSeleccionada] = useState<{
     lat: number;
     lng: number;
@@ -17,18 +20,38 @@ export default function PantallaInicio() {
   // Carga los lugares desde SQLite cada vez que la pantalla recibe foco
   useFocusEffect(
     useCallback(() => {
-      setLugares(obtenerLugares());
+      const lugaresDB = obtenerLugares();
+      setLugares(lugaresDB);
+      console.log(`📚 Cargados ${lugaresDB.length} lugares desde SQLite`);
     }, [])
   );
 
+  // Recibe las coordenadas del long press desde MapaLugares
   const handleLongPress = (latitud: number, longitud: number) => {
+    console.log(`📍 Long press en: ${latitud}, ${longitud}`);
     setCoordSeleccionada({ lat: latitud, lng: longitud });
   };
 
+  // Guarda el nuevo lugar en SQLite y actualiza los marcadores
   const handleGuardar = (nombre: string) => {
     if (!coordSeleccionada) return;
-    insertarLugar(nombre, '', coordSeleccionada.lat, coordSeleccionada.lng, '');
-    setLugares(obtenerLugares()); // refresca marcadores inmediatamente
+
+    // Insertar en SQLite
+    insertarLugar(
+      nombre,
+      '', // descripción vacía por ahora
+      coordSeleccionada.lat,
+      coordSeleccionada.lng,
+      '' // imagen_uri vacía
+    );
+
+    // Recargar lugares y actualizar marcadores automáticamente
+    const lugaresActualizados = obtenerLugares();
+    setLugares(lugaresActualizados);
+
+    console.log(`✅ Lugar "${nombre}" guardado. Total: ${lugaresActualizados.length}`);
+
+    // Cerrar modal
     setCoordSeleccionada(null);
   };
 
@@ -38,10 +61,13 @@ export default function PantallaInicio() {
 
   return (
     <View style={styles.contenedor}>
+      {/* Mapa que captura long press */}
       <MapaLugares onLongPress={handleLongPress}>
+        {/* Marcadores que se actualizan automáticamente */}
         <MarcadoresLugares lugares={lugares} />
       </MapaLugares>
 
+      {/* Modal que aparece al hacer long press */}
       {coordSeleccionada && (
         <ModalNuevoLugar
           visible
