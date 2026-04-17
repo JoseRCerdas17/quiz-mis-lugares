@@ -1,23 +1,20 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
+import { useState, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 
-import MapaLugares from '@/components/mapaLugares';
-import {
-  MarcadoresLugares,
-  ModalNuevoLugar,
-  insertarLugar,
-  obtenerLugares,
-  type Lugar,
-} from '@/_placeholders/placeholders';
+import MapaLugares from '@/components/MapaLugares';
+import ModalNuevoLugar from '@/components/ModalNuevoLugar';
+import MarcadoresLugares from '@/components/MarcadoresLugares';
+import { insertarLugar, obtenerLugares, Lugar } from '@/database/database';
 
-export default function HomeScreen() {
+export default function PantallaInicio() {
   const [lugares, setLugares] = useState<Lugar[]>([]);
   const [coordSeleccionada, setCoordSeleccionada] = useState<{
-    latitud: number;
-    longitud: number;
+    lat: number;
+    lng: number;
   } | null>(null);
 
+  // Carga los lugares desde SQLite cada vez que la pantalla recibe foco
   useFocusEffect(
     useCallback(() => {
       setLugares(obtenerLugares());
@@ -25,37 +22,39 @@ export default function HomeScreen() {
   );
 
   const handleLongPress = (latitud: number, longitud: number) => {
-    setCoordSeleccionada({ latitud, longitud });
+    setCoordSeleccionada({ lat: latitud, lng: longitud });
   };
 
-  const handleGuardar = (nombre: string, descripcion: string) => {
+  const handleGuardar = (nombre: string) => {
     if (!coordSeleccionada) return;
-    insertarLugar(
-      nombre,
-      descripcion,
-      coordSeleccionada.latitud,
-      coordSeleccionada.longitud,
-      ''
-    );
-    setLugares(obtenerLugares());
+    insertarLugar(nombre, '', coordSeleccionada.lat, coordSeleccionada.lng, '');
+    setLugares(obtenerLugares()); // refresca marcadores inmediatamente
+    setCoordSeleccionada(null);
+  };
+
+  const handleCancelar = () => {
     setCoordSeleccionada(null);
   };
 
   return (
-    <View style={styles.container}>
-      <MapaLugares onLongPress={handleLongPress} />
-      <MarcadoresLugares lugares={lugares} />
-      <ModalNuevoLugar
-        visible={coordSeleccionada !== null}
-        latitud={coordSeleccionada?.latitud ?? 0}
-        longitud={coordSeleccionada?.longitud ?? 0}
-        onGuardar={handleGuardar}
-        onCancelar={() => setCoordSeleccionada(null)}
-      />
+    <View style={styles.contenedor}>
+      <MapaLugares onLongPress={handleLongPress}>
+        <MarcadoresLugares lugares={lugares} />
+      </MapaLugares>
+
+      {coordSeleccionada && (
+        <ModalNuevoLugar
+          visible
+          latitud={coordSeleccionada.lat}
+          longitud={coordSeleccionada.lng}
+          onGuardar={handleGuardar}
+          onCancelar={handleCancelar}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  contenedor: { flex: 1 },
 });

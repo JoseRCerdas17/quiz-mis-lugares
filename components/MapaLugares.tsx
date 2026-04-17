@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import MapView, { LongPressEvent } from 'react-native-maps';
 import * as Location from 'expo-location';
 
@@ -24,26 +24,29 @@ export default function MapaLugares({ onLongPress, children }: Props) {
     })();
   }, []);
 
+  const handleLongPress = (e: LongPressEvent) => {
+    const { latitude, longitude } = e.nativeEvent.coordinate;
+    onLongPress(latitude, longitude);
+  };
+
   if (permisoDenegado) {
     return (
-      <View style={styles.fallback}>
-        <Text>Permiso de ubicación denegado. Actívalo en ajustes.</Text>
+      <View style={styles.centrado}>
+        <Text style={styles.textoError}>
+          Permiso de ubicación denegado.{'\n'}Actívalo en los ajustes del dispositivo.
+        </Text>
       </View>
     );
   }
 
   if (!ubicacion) {
     return (
-      <View style={styles.fallback}>
-        <Text>Obteniendo ubicación...</Text>
+      <View style={styles.centrado}>
+        <ActivityIndicator size="large" />
+        <Text style={styles.textoCarga}>Obteniendo ubicación...</Text>
       </View>
     );
   }
-
-  const handleLongPress = (e: LongPressEvent) => {
-    const { latitude, longitude } = e.nativeEvent.coordinate;
-    onLongPress(latitude, longitude);
-  };
 
   return (
     <MapView
@@ -64,5 +67,7 @@ export default function MapaLugares({ onLongPress, children }: Props) {
 
 const styles = StyleSheet.create({
   mapa: { flex: 1 },
-  fallback: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  centrado: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  textoError: { textAlign: 'center', fontSize: 16, color: '#c0392b' },
+  textoCarga: { marginTop: 12, fontSize: 14, color: '#555' },
 });
