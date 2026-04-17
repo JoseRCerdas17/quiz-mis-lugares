@@ -14,7 +14,7 @@ export default function PantallaInicio() {
     lng: number;
   } | null>(null);
 
-  // Carga los lugares desde SQLite cada vez que la pantalla recibe foco
+  // Carga los lugares cada vez que la pantalla recibe foco (persistencia real)
   useFocusEffect(
     useCallback(() => {
       setLugares(obtenerLugares());
@@ -25,10 +25,17 @@ export default function PantallaInicio() {
     setCoordSeleccionada({ lat: latitud, lng: longitud });
   };
 
-  const handleGuardar = (nombre: string) => {
+  const handleGuardar = (nombre: string, descripcion: string) => {
     if (!coordSeleccionada) return;
-    insertarLugar(nombre, '', coordSeleccionada.lat, coordSeleccionada.lng, '');
-    setLugares(obtenerLugares()); // refresca marcadores inmediatamente
+    insertarLugar(
+      nombre,
+      descripcion,
+      coordSeleccionada.lat,
+      coordSeleccionada.lng,
+      ''
+    );
+    // Refresca el estado → MarcadoresLugares se re-renderiza automáticamente
+    setLugares(obtenerLugares());
     setCoordSeleccionada(null);
   };
 

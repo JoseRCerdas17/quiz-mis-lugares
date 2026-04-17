@@ -17,6 +17,9 @@ export default function MarcadoresLugares({ lugares }: Props) {
           <Callout>
             <View style={styles.callout}>
               <Text style={styles.nombre}>{lugar.nombre}</Text>
+              {!!lugar.descripcion?.trim() && (
+                <Text style={styles.descripcion}>{lugar.descripcion}</Text>
+              )}
               <Text style={styles.coords}>
                 {lugar.latitud.toFixed(4)}, {lugar.longitud.toFixed(4)}
               </Text>
@@ -31,5 +34,6 @@ export default function MarcadoresLugares({ lugares }: Props) {
 const styles = StyleSheet.create({
   callout: { padding: 6, maxWidth: 180 },
   nombre: { fontWeight: 'bold', fontSize: 14 },
+  descripcion: { fontSize: 12, color: '#444', marginTop: 4 },
   coords: { fontSize: 11, color: '#888', marginTop: 2 },
 });

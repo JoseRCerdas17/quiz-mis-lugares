@@ -14,21 +14,24 @@ type Props = {
   visible: boolean;
   latitud: number;
   longitud: number;
-  onGuardar: (nombre: string) => void;
+  onGuardar: (nombre: string, descripcion: string) => void;
   onCancelar: () => void;
 };
 
 export default function ModalNuevoLugar({ visible, latitud, longitud, onGuardar, onCancelar }: Props) {
   const [nombre, setNombre] = useState('');
+  const [descripcion, setDescripcion] = useState('');
 
   const handleGuardar = () => {
     if (!nombre.trim()) return;
-    onGuardar(nombre.trim());
+    onGuardar(nombre.trim(), descripcion.trim());
     setNombre('');
+    setDescripcion('');
   };
 
   const handleCancelar = () => {
     setNombre('');
+    setDescripcion('');
     onCancelar();
   };
 
@@ -50,8 +53,16 @@ export default function ModalNuevoLugar({ visible, latitud, longitud, onGuardar,
             value={nombre}
             onChangeText={setNombre}
             autoFocus
+            returnKeyType="next"
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Descripción (opcional)"
+            value={descripcion}
+            onChangeText={setDescripcion}
+            multiline
             returnKeyType="done"
-            onSubmitEditing={handleGuardar}
           />
 
           <View style={styles.botones}>
